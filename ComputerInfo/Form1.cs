@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Management;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ namespace ComputerInfo
             this.LabUserName = new Label();
             this.LabMemory = new Label();
             this.LabIP = new Label();
+
+            Console.WriteLine("abcdefsalkdfjsalfjsklafj;sldajflskajkl");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -36,37 +39,37 @@ namespace ComputerInfo
 
             this.LabName.Text = os.CSName;
             this.LabName.AutoSize = true;
-            this.LabName.Font = new Font("Consolas", 18, FontStyle.Bold);
-            this.LabName.ForeColor = Color.Green;
-            this.LabName.Location = new Point(5, 5);
+            this.LabName.Font = new Font("Consolas", 32, FontStyle.Bold);
+            this.LabName.ForeColor = Color.GreenYellow;
+            this.LabName.Location = new Point(5, 0);
             this.panel1.Controls.Add(this.LabName);
 
-            this.LabVersion.Text = os.Caption;
+            this.LabVersion.Text = os.Caption.Replace("Microsoft ", "");
             this.LabVersion.AutoSize = true;
-            this.LabVersion.Font = new Font("Consolas", 14, FontStyle.Bold);
-            this.LabVersion.ForeColor = Color.Green;
-            this.LabVersion.Location = new Point(5, 30);
+            this.LabVersion.Font = new Font("Consolas", 16, FontStyle.Bold);
+            this.LabVersion.ForeColor = Color.GreenYellow;
+            this.LabVersion.Location = new Point(5, 60);
             this.panel1.Controls.Add(this.LabVersion);
 
             this.LabUserName.Text = Environment.UserName;
             this.LabUserName.AutoSize = true;
-            this.LabUserName.Font = new Font("Consolas", 14, FontStyle.Bold);
-            this.LabUserName.ForeColor = Color.Green;
-            this.LabUserName.Location = new Point(5, 50);
+            this.LabUserName.Font = new Font("Consolas", 16, FontStyle.Bold);
+            this.LabUserName.ForeColor = Color.GreenYellow;
+            this.LabUserName.Location = new Point(5, 85);
             this.panel1.Controls.Add(this.LabUserName);
 
             this.LabMemory.Text = $"RAM 0MB/0MB";
             this.LabMemory.AutoSize = true;
-            this.LabMemory.Font = new Font("Consolas", 14, FontStyle.Bold);
-            this.LabMemory.ForeColor = Color.Green;
-            this.LabMemory.Location = new Point(5, 70);
+            this.LabMemory.Font = new Font("Consolas", 16, FontStyle.Bold);
+            this.LabMemory.ForeColor = Color.GreenYellow;
+            this.LabMemory.Location = new Point(5, 110);
             this.panel1.Controls.Add(this.LabMemory);
 
             this.LabIP.Text = this.GetIP();
             this.LabIP.AutoSize = true;
-            this.LabIP.Font = new Font("Consolas", 14, FontStyle.Bold);
-            this.LabIP.ForeColor = Color.Green;
-            this.LabIP.Location = new Point(5, 90);
+            this.LabIP.Font = new Font("Consolas", 16, FontStyle.Bold);
+            this.LabIP.ForeColor = Color.GreenYellow;
+            this.LabIP.Location = new Point(5, 135);
             this.panel1.Controls.Add(this.LabIP);
         }
 
@@ -89,6 +92,38 @@ namespace ComputerInfo
             }
             var displayString = $"RAM {MemoryToString((long)FreePhysicalMemory)}/{MemoryToString((long)TotalVisibleMemorySize)}";
             this.LabMemory.Text = displayString;
+
+            try
+            {
+                var activeWin = SystemHelper.GetForegroundWindow();
+                var title = new StringBuilder(256);
+                var from = SystemHelper.GetWindowText(activeWin, title, title.Capacity);
+
+                if (title.ToString().Contains("远程桌面"))
+                {
+                    this.LabName.Visible = false;
+                    this.LabVersion.Visible = false;
+                    this.LabUserName.Visible = false;
+                    this.LabMemory.Visible = false;
+                    this.LabIP.Visible = false;
+                }
+                else
+                {
+                    this.LabName.Visible = true;
+                    this.LabVersion.Visible = true;
+                    this.LabUserName.Visible = true;
+                    this.LabMemory.Visible = true;
+                    this.LabIP.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                this.LabName.Visible = true;
+                this.LabVersion.Visible = true;
+                this.LabUserName.Visible = true;
+                this.LabMemory.Visible = true;
+                this.LabIP.Visible = true;
+            }
         }
 
         static String MemoryToString(long byteCount)
@@ -104,13 +139,23 @@ namespace ComputerInfo
 
         private string GetIP()
         {
-            var listIp = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
-                            .Select(p => p.GetIPProperties())
-                            .SelectMany(p => p.UnicastAddresses)
-                            .Where(p => p.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !System.Net.IPAddress.IsLoopback(p.Address))
-                            .ToList();
-            var list = listIp.Select(s => s.Address.ToString()).Where(w => !w.StartsWith("169")).ToList();
-            return String.Join(Environment.NewLine, list);
+            var listIP = new List<String>();
+            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 || ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet)
+                {
+                    foreach (UnicastIPAddressInformation ip in ni.GetIPProperties().UnicastAddresses)
+                    {
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            var ipStr = ip.Address.ToString();
+                            if (!(ipStr.StartsWith("169") || ipStr.EndsWith(".1") || ipStr.EndsWith(".255")))
+                                listIP.Add(ipStr);
+                        }
+                    }
+                }
+            }
+            return String.Join(Environment.NewLine, listIP);
         }
 
         private (string Caption, string CSName) GetOS()

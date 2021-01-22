@@ -43,9 +43,9 @@ namespace ComputerInfo
             // panel1
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel1.Location = new System.Drawing.Point(699, 461);
+            this.panel1.Location = new System.Drawing.Point(613, 461);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(313, 259);
+            this.panel1.Size = new System.Drawing.Size(399, 259);
             this.panel1.TabIndex = 0;
             // 
             // Form1

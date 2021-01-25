@@ -22,10 +22,12 @@ namespace ComputerInfo
         private Label LabMemory { get; set; }
         private long TotalMemory { get; set; }
         private Label LabCPU { get; set; }
+        private Label LabDisk { get; set; }
         private Label LabIP { get; set; }
 
         private PerformanceCounter CpuPC { get; set; }
         private PerformanceCounter RamPC { get; set; }
+        private PerformanceCounter DiskPC { get; set; }
         public Form1()
         {
             InitializeComponent();
@@ -35,9 +37,12 @@ namespace ComputerInfo
             this.LabMemory = new Label();
             this.LabCPU = new Label();
             this.LabIP = new Label();
+            this.LabDisk = new Label();
 
             this.CpuPC = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            this.RamPC = new PerformanceCounter("Memory", "Available MBytes");
+            this.RamPC = new PerformanceCounter("Memory", "Available KBytes");
+            this.DiskPC = new PerformanceCounter("PhysicalDisk", "% Idle Time", "_Total");
+            //this.RamPC = new PerformanceCounter("Memory", "% Committed Bytes In Use");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -80,11 +85,18 @@ namespace ComputerInfo
             this.LabCPU.Location = new Point(5, 135);
             this.panel1.Controls.Add(this.LabCPU);
 
+            this.LabDisk.Text = $"DISK 0%";
+            this.LabDisk.AutoSize = true;
+            this.LabDisk.Font = new Font("Consolas", 16, FontStyle.Bold);
+            this.LabDisk.ForeColor = Color.GreenYellow;
+            this.LabDisk.Location = new Point(5, 160);
+            this.panel1.Controls.Add(this.LabDisk);
+
             this.LabIP.Text = this.GetIP();
             this.LabIP.AutoSize = true;
             this.LabIP.Font = new Font("Consolas", 16, FontStyle.Bold);
             this.LabIP.ForeColor = Color.GreenYellow;
-            this.LabIP.Location = new Point(5, 160);
+            this.LabIP.Location = new Point(5, 185);
             this.panel1.Controls.Add(this.LabIP);
         }
 
@@ -110,9 +122,11 @@ namespace ComputerInfo
 
             this.LabCPU.Text = $"CPU {this.CpuPC.NextValue().ToString("F1")}%";
 
-            var useMemory = long.Parse(this.RamPC.NextValue().ToString("F0")) * 1024;
-            var displayString = $"RAM {MemoryToString(useMemory)}/{MemoryToString(this.TotalMemory)}";
+            var useMemory = long.Parse(this.RamPC.NextValue().ToString("F0"));
+            var displayString = $"RAM {MemoryToString(this.TotalMemory - useMemory)}/{MemoryToString(this.TotalMemory)}";
             this.LabMemory.Text = displayString;
+
+            this.LabDisk.Text = $"Disk {(100.0F - this.DiskPC.NextValue()).ToString("F1")}%";
 
             try
             {
@@ -127,6 +141,7 @@ namespace ComputerInfo
                     this.LabUserName.Visible = false;
                     this.LabMemory.Visible = false;
                     this.LabCPU.Visible = false;
+                    this.LabDisk.Visible = false;
                     this.LabIP.Visible = false;
                 }
                 else
@@ -136,16 +151,19 @@ namespace ComputerInfo
                     this.LabUserName.Visible = true;
                     this.LabMemory.Visible = true;
                     this.LabCPU.Visible = true;
+                    this.LabDisk.Visible = true;
                     this.LabIP.Visible = true;
                 }
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 this.LabName.Visible = true;
                 this.LabVersion.Visible = true;
                 this.LabUserName.Visible = true;
                 this.LabMemory.Visible = true;
                 this.LabCPU.Visible = true;
+                this.LabDisk.Visible = true;
                 this.LabIP.Visible = true;
             }
         }

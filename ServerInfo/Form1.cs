@@ -56,7 +56,7 @@ namespace ServerInfo
             this.LabName.Location = new Point(5, 0);
             this.panel1.Controls.Add(this.LabName);
 
-            this.LabVersion.Text = os.Caption.Replace("Microsoft ", "");
+            this.LabVersion.Text = os.Caption.Replace("Microsoft", "").Replace(" ", "");
             this.LabVersion.AutoSize = true;
             this.LabVersion.Font = new Font("Consolas", 16, FontStyle.Bold);
             this.LabVersion.ForeColor = Color.GreenYellow;
@@ -101,30 +101,10 @@ namespace ServerInfo
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //string strQuery = "select TotalVisibleMemorySize,FreePhysicalMemory from win32_OperatingSystem";
-            //SelectQuery queryOS = new SelectQuery(strQuery);
-            //ulong TotalVisibleMemorySize = 0;
-            //ulong FreePhysicalMemory = 0;
-            //using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(queryOS))
-            //{
-            //    using (var queryResult = searcher.Get())
-            //    {
-            //        foreach (var os in queryResult)
-            //        {
-            //            TotalVisibleMemorySize = (ulong)os["TotalVisibleMemorySize"];
-            //            FreePhysicalMemory = (ulong)os["FreePhysicalMemory"];
-            //        }
-            //    }
-            //}
-            //var displayString = $"RAM {MemoryToString((long)FreePhysicalMemory)}/{MemoryToString((long)TotalVisibleMemorySize)}";
-            //this.LabMemory.Text = displayString;
-
             this.LabCPU.Text = $"CPU {this.CpuPC.NextValue().ToString("F1")}%";
-
             var useMemory = long.Parse(this.RamPC.NextValue().ToString("F0"));
             var displayString = $"RAM {MemoryToString(this.TotalMemory - useMemory)}/{MemoryToString(this.TotalMemory)}";
             this.LabMemory.Text = displayString;
-
             this.LabDisk.Text = $"Disk {(100.0F - this.DiskPC.NextValue()).ToString("F1")}%";
 
             try
@@ -134,36 +114,14 @@ namespace ServerInfo
                 var from = SystemHelper.GetWindowText(activeWin, title, title.Capacity);
 
                 if (title.ToString().Contains("远程桌面"))
-                {
-                    this.LabName.Visible = false;
-                    this.LabVersion.Visible = false;
-                    this.LabUserName.Visible = false;
-                    this.LabMemory.Visible = false;
-                    this.LabCPU.Visible = false;
-                    this.LabDisk.Visible = false;
-                    this.LabIP.Visible = false;
-                }
+                    this.Hide();
                 else
-                {
-                    this.LabName.Visible = true;
-                    this.LabVersion.Visible = true;
-                    this.LabUserName.Visible = true;
-                    this.LabMemory.Visible = true;
-                    this.LabCPU.Visible = true;
-                    this.LabDisk.Visible = true;
-                    this.LabIP.Visible = true;
-                }
+                    this.Show();
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                this.LabName.Visible = true;
-                this.LabVersion.Visible = true;
-                this.LabUserName.Visible = true;
-                this.LabMemory.Visible = true;
-                this.LabCPU.Visible = true;
-                this.LabDisk.Visible = true;
-                this.LabIP.Visible = true;
+                this.Show();
             }
         }
 

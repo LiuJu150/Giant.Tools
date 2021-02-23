@@ -18,16 +18,17 @@ namespace PortMapper
             if (args.Length != 2) return;
             if (args[0].Split(':').Length != 2 || args[1].Split(':').Length != 2) return;
 
+            Console.WriteLine($"本地端口{args[0]} --> 远程端口 {args[1]}");
+
+            var config = new MapperConfig();
             var localArg = args[0].Split(':');
-            var localIp = localArg[0];
-            var localPort = int.Parse(localArg[1]);
+            config.LocalIP = localArg[0];
+            config.LocalPort = int.Parse(localArg[1]);
 
             var remoteArg = args[1].Split(':');
-            var remoteIp = remoteArg[0];
-            var remotePort = int.Parse(remoteArg[1]);
-            Console.WriteLine($"本地端口{args[0]} --> 远程端口 {args[1]}");
-            //默认 127.0.0.1：8080 转发到 127.0.0.1：80
-            var PortMapperSvc = new PortMapperService(localIp, localPort, remoteIp, remotePort);
+            config.RemoteIP = remoteArg[0];
+            config.RemotePort = int.Parse(remoteArg[1]);
+            var PortMapperSvc = new PortMapperService(config);
             PortMapperSvc.Start();
             Console.ReadKey();
         }
@@ -38,25 +39,19 @@ namespace PortMapper
     /// </summary>
     public class PortMapperService
     {
-        public int LocalPort { get; set; }
-        public string LocalIP { get; set; }
-        public int RemotePort { get; set; }
-        public string RemoteIP { get; set; }
+        public MapperConfig Config { get; set; }
         private Socket LocalSocket { get; set; }
-        public PortMapperService(string localIp, int localPort, string remoteIp, int remotePort)
+        public PortMapperService(MapperConfig config)
         {
-            this.LocalIP = localIp;
-            this.LocalPort = localPort;
-            this.RemoteIP = remoteIp;
-            this.RemotePort = remotePort;
+            this.Config = config;
         }
 
         public void Start()
         {
             //服务器IP地址  
-            IPAddress ip = IPAddress.Parse(LocalIP);
+            IPAddress ip = IPAddress.Parse(this.Config.LocalIP);
             this.LocalSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp); ;
-            this.LocalSocket.Bind(new IPEndPoint(ip, LocalPort));
+            this.LocalSocket.Bind(new IPEndPoint(ip, this.Config.LocalPort));
             this.LocalSocket.Listen(10000);
             Console.WriteLine("启动监听{0}成功", this.LocalSocket.LocalEndPoint.ToString());
             Thread myThread = new Thread(Listen);
@@ -71,12 +66,12 @@ namespace PortMapper
         private void Listen(object obj)
         {
             Socket serverSocket = (Socket)obj;
-            IPAddress ip = IPAddress.Parse(RemoteIP);
+            IPAddress ip = IPAddress.Parse(this.Config.RemoteIP);
             while (true)
             {
                 Socket tcp1 = serverSocket.Accept();
                 Socket tcp2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                tcp2.Connect(new IPEndPoint(ip, RemotePort));
+                tcp2.Connect(new IPEndPoint(ip, this.Config.RemotePort));
                 //目标主机返回数据
                 ThreadPool.QueueUserWorkItem(new WaitCallback(SwapMsg), new SwapSock
                 {
@@ -137,5 +132,27 @@ namespace PortMapper
     {
         public Socket FromSocket { get; set; }
         public Socket ToSocket { get; set; }
+    }
+    /// <summary>
+    /// 映射配置
+    /// </summary>
+    public class MapperConfig
+    {
+        /// <summary>
+        /// 本地IP
+        /// </summary>
+        public string LocalIP { get; set; }
+        /// <summary>
+        /// 本地端口
+        /// </summary>
+        public int LocalPort { get; set; }
+        /// <summary>
+        /// 远程IP
+        /// </summary>
+        public string RemoteIP { get; set; }
+        /// <summary>
+        /// 远程端口
+        /// </summary>
+        public int RemotePort { get; set; }
     }
 }

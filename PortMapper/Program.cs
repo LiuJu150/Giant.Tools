@@ -78,53 +78,53 @@ namespace PortMapper
                 Socket tcp2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 tcp2.Connect(new IPEndPoint(ip, RemotePort));
                 //目标主机返回数据
-                ThreadPool.QueueUserWorkItem(new WaitCallback(SwapMsg), new thSock
+                ThreadPool.QueueUserWorkItem(new WaitCallback(SwapMsg), new SwapSock
                 {
-                    tcp1 = tcp2,
-                    tcp2 = tcp1
+                    FromSocket = tcp2,
+                    ToSocket = tcp1
                 });
                 //中间主机请求数据
-                ThreadPool.QueueUserWorkItem(new WaitCallback(SwapMsg), new thSock
+                ThreadPool.QueueUserWorkItem(new WaitCallback(SwapMsg), new SwapSock
                 {
-                    tcp1 = tcp1,
-                    tcp2 = tcp2
+                    FromSocket = tcp1,
+                    ToSocket = tcp2
                 });
             }
         }
         ///两个 tcp 连接 交换数据，一发一收
         public void SwapMsg(object obj)
         {
-            thSock mSocket = (thSock)obj;
+            SwapSock mSocket = (SwapSock)obj;
             while (true)
             {
                 try
                 {
                     byte[] result = new byte[1024];
-                    int num = mSocket.tcp2.Receive(result, result.Length, SocketFlags.None);
+                    int num = mSocket.ToSocket.Receive(result, result.Length, SocketFlags.None);
                     if (num == 0) //接受空包关闭连接
                     {
-                        if (mSocket.tcp1.Connected)
+                        if (mSocket.FromSocket.Connected)
                         {
-                            mSocket.tcp1.Close();
+                            mSocket.FromSocket.Close();
                         }
-                        if (mSocket.tcp2.Connected)
+                        if (mSocket.ToSocket.Connected)
                         {
-                            mSocket.tcp2.Close();
+                            mSocket.ToSocket.Close();
                         }
                         break;
                     }
-                    mSocket.tcp1.Send(result, num, SocketFlags.None);
+                    mSocket.FromSocket.Send(result, num, SocketFlags.None);
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    if (mSocket.tcp1.Connected)
+                    if (mSocket.FromSocket.Connected)
                     {
-                        mSocket.tcp1.Close();
+                        mSocket.FromSocket.Close();
                     }
-                    if (mSocket.tcp2.Connected)
+                    if (mSocket.ToSocket.Connected)
                     {
-                        mSocket.tcp2.Close();
+                        mSocket.ToSocket.Close();
                     }
                     break;
                 }
@@ -133,9 +133,9 @@ namespace PortMapper
 
     }
 
-    public class thSock
+    public class SwapSock
     {
-        public Socket tcp1 { get; set; }
-        public Socket tcp2 { get; set; }
+        public Socket FromSocket { get; set; }
+        public Socket ToSocket { get; set; }
     }
 }

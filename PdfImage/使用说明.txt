@@ -1,0 +1,4 @@
+﻿把PDF文件复制到PdfExportImage.exe程序目录下面
+然后双击运行PdfExportImage.exe
+就可以把PDF里的所有图片导出
+可以一次支持多个PDF同时导出

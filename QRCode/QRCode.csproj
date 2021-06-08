@@ -4,7 +4,16 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>panda128X128.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="panda128X128.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="panda128X128.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="ZXing.Net" Version="0.16.6" />

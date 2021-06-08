@@ -29,6 +29,7 @@ namespace QRCode
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.imgBox = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.txtCode = new System.Windows.Forms.TextBox();
@@ -67,6 +68,7 @@ namespace QRCode
             // 
             // txtCode
             // 
+            this.txtCode.ImeMode = System.Windows.Forms.ImeMode.Off;
             this.txtCode.Location = new System.Drawing.Point(78, 10);
             this.txtCode.Name = "txtCode";
             this.txtCode.Size = new System.Drawing.Size(225, 23);
@@ -181,7 +183,6 @@ namespace QRCode
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(428, 466);
-            this.ControlBox = false;
             this.Controls.Add(this.btnGenerate);
             this.Controls.Add(this.rdoQRCode);
             this.Controls.Add(this.label4);
@@ -193,10 +194,12 @@ namespace QRCode
             this.Controls.Add(this.txtCode);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.imgBox);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "条码生成器";
+            this.TopMost = true;
             ((System.ComponentModel.ISupportInitialize)(this.imgBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numWidth)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numHeight)).EndInit();

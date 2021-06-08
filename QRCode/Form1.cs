@@ -35,6 +35,7 @@ namespace QRCode
             };
             writer.Options = options;
             var img = writer.Write(code);
+            Clipboard.SetImage(img);
             this.imgBox.Image = img;
         }
     }

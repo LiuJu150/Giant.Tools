@@ -73,6 +73,7 @@ namespace QRCode
             this.txtCode.Name = "txtCode";
             this.txtCode.Size = new System.Drawing.Size(225, 23);
             this.txtCode.TabIndex = 2;
+            this.txtCode.TextChanged += new System.EventHandler(this.txtCode_TextChanged);
             // 
             // label2
             // 

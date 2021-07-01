@@ -20,7 +20,17 @@ namespace QRCode
 
         private void btnGenerate_Click(object sender, EventArgs e)
         {
+            this.GenerateImage();
+        }
+
+        private void txtCode_TextChanged(object sender, EventArgs e)
+        {
+            this.GenerateImage();
+        }
+        private void GenerateImage()
+        {
             var code = this.txtCode.Text;
+            if (string.IsNullOrEmpty(code)) return;
             var width = this.numWidth.Value;
             var height = this.numHeight.Value;
 
